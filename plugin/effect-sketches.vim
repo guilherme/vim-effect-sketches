@@ -35,7 +35,9 @@ function effectSketch.preview() dict
 endfunction
 
 function effectSketch.popStep() dict
-  let self.steps = remove(self.steps, 1, -1)
+  if len(self.steps) > 0
+    let self.steps = remove(self.steps, 1, -1)
+  endif
 endfunction
 
 function effectSketch.reset() dict
