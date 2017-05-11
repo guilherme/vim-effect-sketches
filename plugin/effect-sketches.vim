@@ -7,36 +7,54 @@ if exists('g:loaded_effect_sketches')
 endif
 let g:loaded_effect_sketches = 1
 
-let g:effectSketch = {'steps': []}
-function effectSketch.addStep() dict
-	call add(self.steps, expand("<cword>"))
+function NewNode(name, parent)
+  let Node = { 'children': [], 'name': a:name, 'parent': a:parent }
+
+  function Node.asDot() dict
+    let s:lines = ""
+    for child in self.children
+      if type(self.parent) == type('') && self.parent == ''
+        let s:lines = s:lines . child.asDot() . "\n"
+      else
+        let s:dotLine = "\"" . self.name . "\" -> \"" . child.name . "\" \n "
+        let s:lines = s:lines . s:dotLine . child.asDot()
+      endif
+    endfor
+    return s:lines
+  endfunction
+
+  function Node.addChild(node) dict
+    call add(self.children, a:node)
+  endfunction
+
+  return Node
 endfunction
 
-" TODO:
-" REFACTOR CODE.
+
+let g:effectSketch = {'steps': [], 'rootNode': NewNode('root', '') }
+let g:effectSketch.currentNode = effectSketch.rootNode
+
+function effectSketch.addNode() dict
+  let s:newNode = NewNode(expand("<cword>"), self.currentNode)
+  call self.currentNode.addChild(s:newNode)
+  let g:effectSketch.currentNode = s:newNode
+  return s:newNode
+endfunction
+
+function effectSketch.asDot() dict
+  return "digraph effectgraph {\n". self.rootNode.asDot()."\n}"
+endfunction
+
 function effectSketch.preview() dict
-  let gVizDigraph = "digraph effectgraph {\n"
-  let previousStep = 0
-  let stepsLength = len(self.steps)
-  let counter = 0
-	while counter < stepsLength
-    let step = get(self.steps, counter)
-    if counter == 0
-      let previousStep = step
-    else
-      let gVizDigraph = gVizDigraph . "\n \"" . previousStep . "\" -> \"" . step . "\""
-      let previousStep = step
-    endif
-    let counter = counter + 1
-  endwhile
-  let gVizDigraph = gVizDigraph . "}"
-  execute system("echo '" . gVizDigraph . "' | dot -Tsvg -o graph.svg")
+  execute system("echo '" . self.asDot() . "' | dot -Tsvg -o graph.svg")
   execute system("open graph.svg")
 endfunction
 
 function effectSketch.popStep() dict
-  if len(self.steps) > 0
-    let self.steps = remove(self.steps, 1, -1)
+  if self.currentNode != self.rootNode
+    let parent = self.currentNode.parent
+    call remove(parent.children, index(parent.children, 'v:val[name] = "' . self.currentNode.name . '"'), -1)
+    let g:effectSketch.currentNode = parent
   endif
 endfunction
 
@@ -47,7 +65,7 @@ endfunction
 " TODO:
 " FIND OUT BETTER KEY STROKES
 " Sketch step
-nnoremap <F2> :call effectSketch.addStep()<CR> 
+nnoremap <F2> :call effectSketch.addNode()<CR> 
 " Sketch remove seep
 nnoremap <F3> :call effectSketch.popStep()<CR>
 " Sketch Preview
