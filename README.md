@@ -25,7 +25,7 @@ Plugin 'guilherme/vim-effect-sketches'
 ```
 F2 - Mark word under cursor as node in the effect sketch.
 F3 - Remove previous node from the effect sketch
-F4 - Generate and try to open (works on OSX)
+F4 - Generate an SVG with the graph and try to open it using OSX's open (works on OSX)
 F5 - Remove all nodes.
 ```
 
