@@ -35,3 +35,4 @@ Yeah F* feels like 90s. That's ok. This is only the beginning of this plugin.
 - Think of 21st century shortcuts.
 - Add support for multiple branches from a single node.
 - Support multiple platforms.
+- Create nodes with language contextual information instead of just the words under the cursor. Like: ClassName#instance_method.
